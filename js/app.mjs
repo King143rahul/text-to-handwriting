@@ -9,6 +9,7 @@ import {
   deleteAll
 } from './generate-images.mjs';
 import { setInkColor, toggleDrawCanvas } from './utils/draw.mjs';
+import { setupRichText } from './utils/rich-text.mjs';
 
 /**
  *
@@ -18,8 +19,7 @@ import { setInkColor, toggleDrawCanvas } from './utils/draw.mjs';
  * To contribute, you can follow the imports above and make changes in the file
  * related to the issue you've choosen.
  *
- * If you have any questions related to code, you can drop them in my Twitter DM @saurabhcodes
- * or in my email at saurabhdaware99@gmail.com
+ * Rebranded and updated by Rahul Sharma
  *
  * Thanks! and Happy coding 🌻
  *
@@ -116,6 +116,34 @@ const EVENT_MAP = {
       }
     }
   },
+  '#line-spacing': {
+    on: 'input',
+    action: (e) => {
+      document.body.style.setProperty('--line-spacing', e.target.value + 'px');
+    }
+  },
+  '#line-color': {
+    on: 'input',
+    action: (e) => {
+      document.body.style.setProperty('--line-color', e.target.value);
+    }
+  },
+  '#page-size': {
+    on: 'change',
+    action: (e) => {
+      const sizeDict = {
+        a4: '1 / 1.414',
+        letter: '8.5 / 11',
+        legal: '8.5 / 14',
+        a3: '1 / 1.414',
+        a5: '1 / 1.414'
+      };
+      pageEl.style.aspectRatio = sizeDict[e.target.value] || '1 / 1.414';
+      if (e.target.value === 'a3') pageEl.style.maxWidth = '1000px';
+      else if (e.target.value === 'a5') pageEl.style.maxWidth = '500px';
+      else pageEl.style.maxWidth = '800px';
+    }
+  },
   '#draw-diagram-button': {
     on: 'click',
     action: () => {
@@ -151,13 +179,17 @@ const EVENT_MAP = {
 };
 
 for (const eventSelector in EVENT_MAP) {
-  document
-    .querySelector(eventSelector)
-    .addEventListener(
+  const el = document.querySelector(eventSelector);
+  if (el) {
+    el.addEventListener(
       EVENT_MAP[eventSelector].on,
       EVENT_MAP[eventSelector].action
     );
+  }
 }
+
+// Initialize rich text features
+setupRichText();
 
 /**
  * This makes toggles, accessible.
@@ -178,30 +210,4 @@ document.querySelectorAll('.switch-toggle input').forEach((toggleInput) => {
   });
 });
 
-/**
- * Set GitHub Contributors
- */
-
-fetch(
-  'https://api.github.com/repos/saurabhdaware/text-to-handwriting/contributors'
-)
-  .then((res) => res.json())
-  .then((res) => {
-    document.querySelector('#project-contributors').innerHTML = res
-      .map(
-        (contributor) => /* html */ `
-        <div class="contributor-profile shadow">
-          <a href="${contributor.html_url}">
-            <img 
-              alt="GitHub avatar of contributor ${contributor.login}" 
-              class="contributor-avatar" 
-              loading="lazy" 
-              src="${contributor.avatar_url}" 
-            />
-            <div class="contributor-username">${contributor.login}</div>
-          </a>
-        </div>
-      `
-      )
-      .join('');
-  });
+// Removed old GitHub contributors fetch
